@@ -1,5 +1,5 @@
-(define (problem star_craft_prob1)
-	(:domain star_craft1)
+(define (problem star_craft_prob2)
+	(:domain star_craft2)
 	(:objects
 		loc1 loc2 loc3 loc4 - localizacion
 		cent_mand1 - edificio

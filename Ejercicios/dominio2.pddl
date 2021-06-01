@@ -17,7 +17,7 @@
 		;indico que hay un camino entre 2 localizaciones
 		(camino ?loc1 ?loc2 - localizacion)
 
-		;indico si que hay un edificio construido en la localizacion indicada
+		;indico si que hay un edificio construido
 		(construido ?edi - edificio)
 
 		;indico que hay recursos en cierta localizacion
@@ -29,12 +29,17 @@
 		;indico que la unidad esta libre
 		(libre ?uni - unidad)
 
-		;indico el tipo de unidad
+		;indico lo que necesita el edificio para construirse
+		(necesita ?edi - edificio ?rec - recurso)
+
+		;indico los tipos de edificios, unidades y recursos
 		(unidades ?uni - unidad ?tip - tipoUnidad)
-		;indico el tipo de edificio
 		(edificios ?edif - edificio ?tip - tipoEdificio)
-		;indico el tipo de recurso
 		(recursos ?rec - recurso ?tip - recurso)
+
+		;indico que se esta extrayendo gas
+		(depositoEn ?loc -localizacion ?rec - recurso)
+
 	)
 
 	;que una unidad se mueva de una localización a otra
@@ -61,7 +66,6 @@
 	)
 
 	;Asigna a una unidad la extracción de un recurso
-	;Asigna a una unidad la extracción de un recurso
 	(:action asignar
 		:parameters (?uni - unidad ?loc_rec - localizacion ?rec - recurso)
 		:precondition
@@ -77,11 +81,83 @@
 
 				;y que la unidad este en la misma localización que el recurso
 				(en ?uni ?loc_rec)
+
+				;dependiendo del tipo de recurso
+				(or
+					(recursos ?rec mineral)
+					(and
+						(recursos ?rec gas)
+						(exists
+							(?edi - edificio)
+							(edificios ?edi extractor)
+							(construido ?edi)
+						)
+					)
+				)
 			)
 		:effect
+			(when
+				(and
+					(recursos ?rec gas)
+				)
+				(and
+					(depositoEn ?loc gas)
+				)
+			)
+			(when
+				(and
+					(recursos ?rec mineral)
+				)
+				(and
+					(depositoEn ?loc mineral)
+				)
+			)
 			(and
 				(not (libre ?uni))
 				(extrayendo ?rec)
 			)
 	)
+
+	;construcción de un edificio
+	(:action construir
+		:parameters (?uni - unidad ?edi - edificio ?loc - localizacion ?rec - recurso)
+		:precondition
+			(and ;Para la construcción del edificio necesita
+
+				;que haya una unidad libre (que no este extrayendo)
+				(libre ?uni)
+
+				;que la unidad este en la localización donde se construira el edificio
+				(en ?uni ?loc)
+
+				;que no se haya construido un edificio
+				(not (construido ?edi))
+
+				;que se este extrayendo un recurso
+				(extrayendo ?rec)
+
+				;y que dicho recurso que se esta extrayendo sea el que necesite para construir el edificio
+				(necesita ?edi ?rec)
+
+				;ademas
+				(or
+					;que no haya un edificio extractor construido
+					(not (edificioEs ?edi extractor))
+					;o que este construido el edificio extractor y tenga un deposito de gas
+					(and
+						(edificioEs ?edi extractor)
+						(depositoEn ?loc gas)
+					)
+				)
+			)
+		:effect
+			(and ;aplicara los siguientes cambios
+				
+				;que se ha construido el edificio indicado
+				(construido ?edi)
+
+				;en la localización indicada
+				(en ?edi ?loc)
+			)
+	)	
 )
