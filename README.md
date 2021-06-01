@@ -1,3 +1,8 @@
+Classical Plannig
+=====
+
+<h4>Program Metric-FF</h4>
+
 This directory contains the C implementation of Metric-FF, as it was
 used in the 3rd international planning competition. Build the planner
 by typing
