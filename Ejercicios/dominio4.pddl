@@ -1,12 +1,12 @@
-(define (domain star_craft2)
+(define (domain star_craft4)
 	(:requirements :strips :typing)
 	(:types
-		entidad localizacion recurso tipoRecurso - object
+		entidad localizacion recurso tipo tipoRecurso - object
 		unidad edificio - entidad
 		tipoEdificio tipoUnidad - tipo
 	)
 	(:constants
-		vce - tipoUnidad
+		vce marine segador - tipoUnidad
 		centro_de_mando barracon extractor - tipoEdificio
 		mineral gas - tipoRecurso
 	)
@@ -30,7 +30,7 @@
 		;indico que la unidad esta libre
 		(libre ?uni - unidad)
 
-		;indico lo que necesita el edificio para construirse
+		;indico lo que necesita el edificio para construirse y tambien con las unidades
 		(necesita ?x - tipo ?rec - tipoRecurso)
 
 		;indico los tipos de edificios, unidades y recursos
@@ -40,6 +40,9 @@
 
 		;indico que se esta extrayendo gas o mineral
 		(depositoEn ?loc -localizacion ?rec - tipoRecurso)
+
+		;indico que ha sido reclutado
+		(reclutado ?uni - unidad ?edi - edificio)
 
 	)
 
@@ -104,8 +107,8 @@
 		:effect
 
 			(and
-				(not (libre ?uni))
-			
+				(not (libre ?uni))			
+
 				(when
 					(and (recursos ?rec gas))
 					(and
@@ -124,7 +127,7 @@
 
 	;construcción de un edificio
 	(:action construir
-		:parameters (?uni - unidad ?edi - edificio ?loc - localizacion ?rec - recurso)
+		:parameters (?uni - unidad ?edi - edificio ?loc - localizacion)
 		:precondition
 			(and ;Para la construcción del edificio necesita
 
@@ -136,30 +139,22 @@
 
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
+				(en ?edi ?loc)
 
 				;que no se haya construido un edificio
 				(not (construido ?edi))
 
-				;que se este extrayendo un recurso
+				;comprueba que recursos necesita para construir el edificio
 				(or
 					(and 
 						(edificios ?edi extractor)
 						(necesita extractor mineral)
 						(extrayendo mineral)
 					)
-				)
-
-				;ademas
-				(or
-					;que no haya un edificio extractor construido
-					(and
-						(edificios ?edi extractor)
-						(not (construido ?edi))
-					)
-					;o que este construido el edificio extractor y tenga un deposito de gas
-					(and
-						(edificios ?edi extractor)
-						(depositoEn ?loc gas)
+					(and 
+						(edificios ?edi barracon)
+						(necesita barracon mineral)
+						(extrayendo mineral)
 					)
 				)
 			)
@@ -171,6 +166,73 @@
 
 				;en la localización indicada
 				(en ?edi ?loc)
+			)
+	)
+
+	;reclutar unidades
+	(:action reclutar
+		:parameters (?edi - edificio ?uni - unidad ?loc - localizacion)
+		:precondition
+			(and ;Para reclutar unidades necesita
+
+				;dependiendo del tipo de unidad tiene que coincidir el tipo de edificio
+				(or 
+					(and
+						(unidades ?uni vce)
+						(edificios ?edi centro_de_mando)
+						(en ?edi ?loc)
+					)
+					(and
+						(or
+							(unidades ?uni marine)
+							(unidades ?uni segador)
+						)
+						(edificios ?edi barracon)
+						(en ?edi ?loc)
+					)
+				)
+
+				;necesita estar construido el edificio que los recluta
+				(construido ?edi)
+
+				;compruebo que no se ha creado antes esa unidad
+				(not (exists (?loc2 - localizacion)
+						(en ?uni ?loc2)
+					)
+				)
+
+				;comprueba que recursos necesita para reclutar
+				(or
+					(and 
+						(unidades ?uni vce)
+						(necesita vce mineral)
+						(extrayendo mineral)
+					)
+					(and 
+						(unidades ?uni marine)
+						(necesita marine mineral)
+						(extrayendo mineral)
+					)
+					(and 
+						(unidades ?uni segador)
+						(necesita segador mineral)
+						(necesita segador gas)
+						(extrayendo mineral)
+						(extrayendo gas)
+					)
+				)
+
+				
+			)
+		:effect
+			(and ;aplicara los siguientes cambios
+				
+				;indico que recluto a la unidad en el edificio tal
+				(reclutado ?uni ?edi)
+				;en la localización indicada
+				(en ?uni ?loc)
+				;y esta libre
+				(libre ?uni)
 			)
 	)
 

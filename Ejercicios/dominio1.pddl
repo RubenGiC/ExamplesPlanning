@@ -1,13 +1,13 @@
 (define (domain star_craft1)
 	(:requirements :strips :typing)
 	(:types
-		entidad localizacion recurso tipoEdificio tipoUnidad - object
+		entidad localizacion recurso tipoEdificio tipoUnidad tipoRecurso - object
 		unidad edificio - entidad
 	)
 	(:constants
 		vce - tipoUnidad
 		centro_de_mando barracon extractor - tipoEdificio
-		mineral gas - recurso
+		mineral gas - tipoRecurso
 	)
 	(:predicates
 
@@ -34,7 +34,7 @@
 		;indico el tipo de edificio
 		(edificios ?edif - edificio ?tip - tipoEdificio)
 		;indico el tipo de recurso
-		(recursos ?rec - recurso ?tip - recurso)
+		(recursos ?rec - recurso ?tip - tipoRecurso)
 	)
 
 	;que una unidad se mueva de una localización a otra

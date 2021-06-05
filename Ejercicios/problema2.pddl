@@ -2,7 +2,7 @@
 	(:domain star_craft2)
 	(:objects
 		loc11 loc12 loc13 loc14 loc21 loc22 loc23 loc24 loc31 loc32 loc33 loc34 - localizacion
-		cent_mand1 - edificio
+		cent_mand1 extractor1 - edificio
 		vce1 vce2 - unidad
 		rec1 rec2 rec3 - recurso
 	)
@@ -22,6 +22,12 @@
 
 		(camino loc31 loc32)
 		(camino loc33 loc34)
+
+		;indicamos que es un edificio extractor
+		(edificios extractor1 extractor)
+
+		;inicializando tipo de recurso para construir
+		(necesita extractor mineral)
 
 		;el centro de comando 1 se encuentra en la localización 11
 		(construido cent_mand1)
@@ -49,13 +55,13 @@
 		;y ambos recursos son de tipo mineral
 		(recursos rec1 mineral)
 		(recursos rec2 mineral)
+
+		;Y un recurso de gas
+		(recursos rec3 gas)
 	)
 	(:goal
 		(and
-			(or 
-				(extrayendo rec1)
-				(extrayendo rec2)
-			)
+			(extrayendo gas)
 		)
 	)
 )

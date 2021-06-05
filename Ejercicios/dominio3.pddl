@@ -1,4 +1,4 @@
-(define (domain star_craft2)
+(define (domain star_craft3)
 	(:requirements :strips :typing)
 	(:types
 		entidad localizacion recurso tipoRecurso - object
@@ -104,8 +104,8 @@
 		:effect
 
 			(and
-				(not (libre ?uni))
-			
+				(not (libre ?uni))			
+
 				(when
 					(and (recursos ?rec gas))
 					(and
@@ -124,7 +124,7 @@
 
 	;construcción de un edificio
 	(:action construir
-		:parameters (?uni - unidad ?edi - edificio ?loc - localizacion ?rec - recurso)
+		:parameters (?uni - unidad ?edi - edificio ?loc - localizacion)
 		:precondition
 			(and ;Para la construcción del edificio necesita
 
@@ -136,30 +136,22 @@
 
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
+				(en ?edi ?loc)
 
 				;que no se haya construido un edificio
 				(not (construido ?edi))
 
-				;que se este extrayendo un recurso
+				;comprueba que recursos necesita para construir el edificio
 				(or
 					(and 
 						(edificios ?edi extractor)
 						(necesita extractor mineral)
 						(extrayendo mineral)
 					)
-				)
-
-				;ademas
-				(or
-					;que no haya un edificio extractor construido
-					(and
-						(edificios ?edi extractor)
-						(not (construido ?edi))
-					)
-					;o que este construido el edificio extractor y tenga un deposito de gas
-					(and
-						(edificios ?edi extractor)
-						(depositoEn ?loc gas)
+					(and 
+						(edificios ?edi barracon)
+						(necesita barracon mineral)
+						(extrayendo mineral)
 					)
 				)
 			)

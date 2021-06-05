@@ -1,9 +1,9 @@
-(define (problem star_craft_prob4)
-	(:domain star_craft4)
+(define (problem star_craft_prob3)
+	(:domain star_craft3)
 	(:objects
 		loc11 loc12 loc13 loc14 loc21 loc22 loc23 loc24 loc31 loc32 loc33 loc34 - localizacion
-		cent_mand1 extractor1 barracon1 barracon2 barracon3 - edificio
-		vce1 vce2 vce3 marine1 marine2 segador1 - unidad
+		cent_mand1 extractor1 barracon1 - edificio
+		vce1 vce2 vce3 - unidad
 		rec1 rec2 rec3 - recurso
 	)
 	(:init
@@ -26,28 +26,21 @@
 		;indicamos el tipo de edificio
 		(edificios extractor1 extractor)
 		(edificios barracon1 barracon)
-		(edificios barracon2 barracon)
-		(edificios barracon3 barracon)
 
-		;inicializando tipo de recurso para construir o reclutar
+		;inicializando tipo de recurso para construir
 		(necesita extractor mineral)
 		(necesita barracon mineral)
-		(necesita vce mineral)
-		(necesita marine mineral)
-		(necesita segador mineral)
-		(necesita segador gas)
 
-		;indicamos el tipo de unidades
+		;las unidades son de tipo vce
 		(unidades vce1 vce)
 		(unidades vce2 vce)
 		(unidades vce3 vce)
-		(unidades marine1 marine)
-		(unidades marine2 marine)
-		(unidades segador1 segador)
 
-		;Indicamos los tipos de recursos
+		;y ambos recursos son de tipo mineral
 		(recursos rec1 mineral)
 		(recursos rec2 mineral)
+
+		;Y un recurso de gas
 		(recursos rec3 gas)
 
 		;el centro de comando 1 se encuentra en la localización 11
@@ -58,16 +51,18 @@
 
 		;indicamos donde se encuentra los edificios
 		(en cent_mand1 loc11)
-		(en barracon1 loc31)
-		(en barracon2 loc24)
-		(en barracon3 loc12)
+		(en barracon1 loc32)
 		(en extractor1 loc13)
 
 		;y las unidades tambien se encuentra en esa misma localizacion
 		(en vce1 loc11)
+		(en vce2 loc11)
+		(en vce3 loc11)
 
 		;las unidades esta libre
 		(libre vce1)
+		(libre vce2)
+		(libre vce3)
 
 		;los recursos se encuentra en las localizaciones
 		(hay rec1 loc23)
@@ -77,16 +72,7 @@
 	)
 	(:goal
 		(and
-
-			(reclutado marine1 barracon1)
-			(en marine1 loc31)
-			(libre marine1)
-			(reclutado marine2 barracon2)
-			(en marine2 loc24)
-			(libre marine2)
-			(reclutado segador1 barracon3)
-			(en segador1 loc12)
-			(libre segador1)
+			(construido barracon1)
 		)
 	)
 )
