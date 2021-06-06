@@ -145,16 +145,27 @@
 				(not (construido ?edi))
 
 				;comprueba que recursos necesita para construir el edificio
-				(or
-					(and 
-						(edificios ?edi extractor)
-						(necesita extractor mineral)
-						(extrayendo mineral)
-					)
-					(and 
-						(edificios ?edi barracon)
-						(necesita barracon mineral)
-						(extrayendo mineral)
+				(exists (?tip_edi - tipoEdificio)
+					(and
+						(edificios ?edi ?tip_edi)
+						(or
+							(and 
+								(necesita ?tip_edi mineral)
+								(not (necesita ?tip_edi gas))
+								(extrayendo mineral)
+							)
+							(and 
+								(necesita ?tip_edi gas)
+								(not (necesita ?tip_edi mineral))
+								(extrayendo gas)
+							)
+							(and 
+								(necesita ?tip_edi mineral)
+								(necesita ?tip_edi gas)
+								(extrayendo mineral)
+								(extrayendo gas)
+							)
+						)
 					)
 				)
 			)
@@ -202,26 +213,29 @@
 				)
 
 				;comprueba que recursos necesita para reclutar
-				(or
-					(and 
-						(unidades ?uni vce)
-						(necesita vce mineral)
-						(extrayendo mineral)
-					)
-					(and 
-						(unidades ?uni marine)
-						(necesita marine mineral)
-						(extrayendo mineral)
-					)
-					(and 
-						(unidades ?uni segador)
-						(necesita segador mineral)
-						(necesita segador gas)
-						(extrayendo mineral)
-						(extrayendo gas)
+				(exists (?tip_uni - tipoUnidad)
+					(and
+						(unidades ?uni ?tip_uni)
+						(or
+							(and 
+								(necesita ?tip_uni mineral)
+								(not (necesita ?tip_uni gas))
+								(extrayendo mineral)
+							)
+							(and 
+								(necesita ?tip_uni gas)
+								(not (necesita ?tip_uni mineral))
+								(extrayendo gas)
+							)
+							(and 
+								(necesita ?tip_uni mineral)
+								(necesita ?tip_uni gas)
+								(extrayendo mineral)
+								(extrayendo gas)
+							)
+						)
 					)
 				)
-
 				
 			)
 		:effect

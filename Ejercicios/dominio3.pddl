@@ -142,16 +142,27 @@
 				(not (construido ?edi))
 
 				;comprueba que recursos necesita para construir el edificio
-				(or
-					(and 
-						(edificios ?edi extractor)
-						(necesita extractor mineral)
-						(extrayendo mineral)
-					)
-					(and 
-						(edificios ?edi barracon)
-						(necesita barracon mineral)
-						(extrayendo mineral)
+				(exists (?tip_edi - tipoEdificio)
+					(and
+						(edificios ?edi ?tip_edi)
+						(or
+							(and 
+								(necesita ?tip_edi mineral)
+								(not (necesita ?tip_edi gas))
+								(extrayendo mineral)
+							)
+							(and 
+								(necesita ?tip_edi gas)
+								(not (necesita ?tip_edi mineral))
+								(extrayendo gas)
+							)
+							(and 
+								(necesita ?tip_edi mineral)
+								(necesita ?tip_edi gas)
+								(extrayendo mineral)
+								(extrayendo gas)
+							)
+						)
 					)
 				)
 			)
