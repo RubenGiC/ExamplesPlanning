@@ -260,7 +260,7 @@
 
 						(at start (at ?x 0))
 						(at start
-							(< 50 (cantidad ?tip_rec ?x))
+							(< 50 (+ (cantidad ?tip_rec ?x) 10))
 						)
 					)
 				)

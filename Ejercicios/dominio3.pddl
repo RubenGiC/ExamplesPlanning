@@ -134,11 +134,23 @@
 				;que esa unidad sea de tipo VCE
 				(unidades ?uni vce)
 
+				;que no haya ningun edificio construido en esa localización
+				(not (exists (?edi2 - edificio)
+						(and
+							(construido ?edi2)
+							(en ?edi2 ?loc)
+						)
+					)
+				)
+
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
-				(en ?edi ?loc)
+				(or
+					(en ?edi ?loc)
+					(not (en ?edi ?loc))
+				)
 
-				;que no se haya construido un edificio
+				;que no se haya construido el edificio
 				(not (construido ?edi))
 
 				;comprueba que recursos necesita para construir el edificio
@@ -164,6 +176,22 @@
 							)
 						)
 					)
+				)
+
+				;ademas
+				(or
+					;si el edificio a construir es un extractor, tiene que construirse
+					;en la misma localización donde este el recurso gas
+					(and
+						(edificios ?edi extractor)
+						(exists (?rec - recurso)
+							(and
+								(recursos ?rec gas)
+								(hay ?rec ?loc)
+							)
+						)
+					)
+					(not (edificios ?edi extractor))
 				)
 			)
 		:effect

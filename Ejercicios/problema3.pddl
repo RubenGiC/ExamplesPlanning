@@ -30,6 +30,7 @@
 		;inicializando tipo de recurso para construir
 		(necesita extractor mineral)
 		(necesita barracon mineral)
+		(necesita barracon gas)
 
 		;las unidades son de tipo vce
 		(unidades vce1 vce)
@@ -51,8 +52,6 @@
 
 		;indicamos donde se encuentra los edificios
 		(en cent_mand1 loc11)
-		(en barracon1 loc32)
-		(en extractor1 loc13)
 
 		;y las unidades tambien se encuentra en esa misma localizacion
 		(en vce1 loc11)
@@ -73,6 +72,7 @@
 	(:goal
 		(and
 			(construido barracon1)
+			(en barracon1 loc32)
 		)
 	)
 )

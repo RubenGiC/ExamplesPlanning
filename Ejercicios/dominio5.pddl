@@ -143,21 +143,26 @@
 				;que esa unidad sea de tipo VCE
 				(unidades ?uni vce)
 
+				;que no haya ningun edificio construido en esa localización
+				(not (exists (?edi2 - edificio)
+						(and
+							(construido ?edi2)
+							(en ?edi2 ?loc)
+						)
+					)
+				)
+
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
+				;(or
+				;	(en ?edi ?loc)
+				;	(no_loc ?edi)
+				;)
+
 				(or
 					(en ?edi ?loc)
-					(no_loc ?edi)
+					(not (en ?edi ?loc))
 				)
-				
-
-				;que no se haya construido un edificio en esa localización
-				(not (exists (?edi - edificio)
-					(and
-						(construido ?edi)
-						(en ?edi ?loc)
-					)
-				))
 
 				;que el edificio a construir no este construido
 				(not (construido ?edi))

@@ -2,7 +2,7 @@
 	(:domain star_craft4)
 	(:objects
 		loc11 loc12 loc13 loc14 loc21 loc22 loc23 loc24 loc31 loc32 loc33 loc34 - localizacion
-		cent_mand1 extractor1 barracon1 barracon2 barracon3 - edificio
+		cent_mand1 extractor1 barracon1 - edificio
 		vce1 vce2 vce3 marine1 marine2 segador1 - unidad
 		rec1 rec2 rec3 - recurso
 	)
@@ -26,12 +26,11 @@
 		;indicamos el tipo de edificio
 		(edificios extractor1 extractor)
 		(edificios barracon1 barracon)
-		(edificios barracon2 barracon)
-		(edificios barracon3 barracon)
 
 		;inicializando tipo de recurso para construir o reclutar
 		(necesita extractor mineral)
 		(necesita barracon mineral)
+		(necesita barracon gas)
 		(necesita vce mineral)
 		(necesita marine mineral)
 		(necesita segador mineral)
@@ -58,10 +57,6 @@
 
 		;indicamos donde se encuentra los edificios
 		(en cent_mand1 loc11)
-		(en barracon1 loc31)
-		(en barracon2 loc24)
-		(en barracon3 loc12)
-		(en extractor1 loc13)
 
 		;y las unidades tambien se encuentra en esa misma localizacion
 		(en vce1 loc11)
@@ -77,14 +72,19 @@
 	)
 	(:goal
 		(and
+			;que este construido el barracon1 en la localizacion 32
+			(construido barracon1)
+			(en barracon1 loc32)
 
+			;que se recluten los marines y el segador en el barracon1
+			;y que esten en sus localizaciones
 			(reclutado marine1 barracon1)
 			(en marine1 loc31)
 			(libre marine1)
-			(reclutado marine2 barracon2)
+			(reclutado marine2 barracon1)
 			(en marine2 loc24)
 			(libre marine2)
-			(reclutado segador1 barracon3)
+			(reclutado segador1 barracon1)
 			(en segador1 loc12)
 			(libre segador1)
 		)
