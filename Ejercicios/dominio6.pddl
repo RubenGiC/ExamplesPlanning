@@ -31,7 +31,7 @@
 		(libre ?uni - unidad)
 
 		;indico lo que necesita el edificio para construirse y tambien con las unidades
-		(necesita ?x - tipo ?rec - tipoRecurso)
+		;(necesita ?x - tipo ?rec - tipoRecurso)
 
 		;indico los tipos de edificios, unidades y recursos
 		(unidades ?uni - unidad ?tip - tipoUnidad)
@@ -47,7 +47,9 @@
 	)
 	(:functions
 		;indico la cantidad almacenada de cada tipo de recurso
-		(cantidad ?tip_rec - tipoRecurso ?x)
+		(almacenado ?tip_rec - tipoRecurso)
+		(nAsignados ?loc - localizacion)
+		(necesita ?tip - tipo ?rec - tipoRecurso)
 	)
 
 	;que una unidad se mueva de una localización a otra
@@ -126,6 +128,8 @@
 						(extrayendo mineral)
 					)
 				)
+
+				(increase (nAsignados ?loc_rec) 1)
 			)
 	)
 
@@ -141,36 +145,65 @@
 				;que esa unidad sea de tipo VCE
 				(unidades ?uni vce)
 
+				;que no haya ningun edificio construido en esa localización
+				(not (exists (?edi2 - edificio)
+						(and
+							(construido ?edi2)
+							(en ?edi2 ?loc)
+						)
+					)
+				)
+
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
-				(en ?edi ?loc)
+				(or
+					(en ?edi ?loc)
+					(not (en ?edi ?loc))
+				)
 
-				;que no se haya construido un edificio
+				;que no se haya construido el edificio
 				(not (construido ?edi))
 
 				;comprueba que recursos necesita para construir el edificio
+				;y que la cantidad a necesitar la tenga el almacen
 				(exists (?tip_edi - tipoEdificio)
 					(and
 						(edificios ?edi ?tip_edi)
 						(or
 							(and 
-								(necesita ?tip_edi mineral)
-								(not (necesita ?tip_edi gas))
+								(>= (almacenado mineral) (necesita ?tip_edi mineral))
+								(<= (necesita ?tip_edi gas) 0)
 								(extrayendo mineral)
 							)
 							(and 
-								(necesita ?tip_edi gas)
-								(not (necesita ?tip_edi mineral))
+								(>= (almacenado gas) (necesita ?tip_edi gas))
+								(<= (necesita ?tip_edi mineral) 0)
 								(extrayendo gas)
 							)
 							(and 
-								(necesita ?tip_edi mineral)
-								(necesita ?tip_edi gas)
+								(>= (almacenado mineral) (necesita ?tip_edi mineral))
+								(>= (almacenado gas) (necesita ?tip_edi gas))
 								(extrayendo mineral)
 								(extrayendo gas)
 							)
 						)
 					)
+				)
+
+				;ademas
+				(or
+					;si el edificio a construir es un extractor, tiene que construirse
+					;en la misma localización donde este el recurso gas
+					(and
+						(edificios ?edi extractor)
+						(exists (?rec - recurso)
+							(and
+								(recursos ?rec gas)
+								(hay ?rec ?loc)
+							)
+						)
+					)
+					(not (edificios ?edi extractor))
 				)
 			)
 		:effect
@@ -181,6 +214,19 @@
 
 				;en la localización indicada
 				(en ?edi ?loc)
+
+				(when (edificios ?edi extractor)
+					(and
+						(decrease (almacenado mineral) (necesita extractor mineral))
+					)
+				)
+
+				(when (edificios ?edi barracon)
+					(and
+						(decrease (almacenado mineral) (necesita barracon mineral))
+						(decrease (almacenado gas) (necesita barracon gas))
+					)
+				)
 			)
 	)
 
@@ -222,9 +268,9 @@
 						(unidades ?uni ?tip_uni)
 						(forall (?rec - tipoRecurso)
 							(or
-								(not (necesita ?tip_uni ?rec))
+								(not (> (almacenado ?rec) (necesita ?tip_uni ?rec)))
 								(and
-									(necesita ?tip_uni ?rec)
+									(> (almacenado ?rec) (necesita ?tip_uni ?rec))
 									(extrayendo ?rec)
 								)
 							)
@@ -246,22 +292,30 @@
 	)
 
 		
-	;
+	;recolecta los recursos
 	(:action recolectar
 		:parameters (?rec - recurso ?loc - localizacion)
 		:precondition
 			(and
+				;compruebo que la localización coincide con el recurso
+				(hay ?rec ?loc)
+
 				;comprobamos que se esta extrayendo dicho recurso
+				;y que el incremento no supere el tope del almacenado
 				(exists (?tip_rec - tipoRecurso)
 					(and
 						(recursos ?rec ?tip_rec)
 						(extrayendo ?tip_rec)
 						(depositoEn ?loc ?tip_rec)
 
-						(at start (at ?x 0))
-						(at start
-							(< 50 (+ (cantidad ?tip_rec ?x) 10))
-						)
+						(<= 
+							(+ 
+								(almacenado ?tip_rec)
+								(* 
+									10 (nAsignados ?loc)
+								) 
+							) 
+						60)
 					)
 				)
 
@@ -276,12 +330,12 @@
 			(when
 				(and (recursos ?rec gas))
 				(and
-					(increase (cantidad gas ?x) 10)
+					(increase (almacenado gas) 10)
 				)
 			)
 			(when (and (recursos ?rec mineral))
 				(and
-					(increase (cantidad mineral ?x) 10)
+					(increase (almacenado mineral) 10)
 				)
 			)
 		)
