@@ -1,10 +1,11 @@
-(define (problem star_craft_prob6)
-	(:domain star_craft6)
+(define (problem star_craft_prob5)
+	(:domain star_craft5)
 	(:objects
 		loc11 loc12 loc13 loc14 loc21 loc22 loc23 loc24 loc31 loc32 loc33 loc34 - localizacion
-		cent_mand1 extractor1 barracon1 barracon2 barracon3 - edificio
+		cent_mand1 extractor1 barracon1 barracon2 barracon3 bahia_de_ingenieria1 - edificio
 		vce1 vce2 vce3 marine1 marine2 segador1 - unidad
 		rec1 rec2 rec3 - recurso
+		impulsar_segador - investigacion
 	)
 	(:init
 		;inicializo las conexiones de las localizaciones
@@ -23,19 +24,29 @@
 		(camino loc31 loc32)
 		(camino loc33 loc34)
 
+		;indico que no tiene localización
+		(no_loc bahia_de_ingenieria1)
+		(no_loc extractor1)
+
 		;indicamos el tipo de edificio
 		(edificios extractor1 extractor)
 		(edificios barracon1 barracon)
 		(edificios barracon2 barracon)
 		(edificios barracon3 barracon)
+		(edificios bahia_de_ingenieria1 bahia_de_ingenieria)
 
 		;inicializando tipo de recurso para construir o reclutar
 		(necesita extractor mineral)
 		(necesita barracon mineral)
+		(necesita bahia_de_ingenieria mineral)
+		(necesita bahia_de_ingenieria gas)
 		(necesita vce mineral)
 		(necesita marine mineral)
 		(necesita segador mineral)
 		(necesita segador gas)
+		(necesita impulsar_segador mineral)
+		(necesita impulsar_segador gas)
+
 
 		;indicamos el tipo de unidades
 		(unidades vce1 vce)
@@ -61,7 +72,6 @@
 		(en barracon1 loc31)
 		(en barracon2 loc24)
 		(en barracon3 loc12)
-		(en extractor1 loc13)
 
 		;y las unidades tambien se encuentra en esa misma localizacion
 		(en vce1 loc11)

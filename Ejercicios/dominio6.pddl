@@ -1,5 +1,5 @@
-(define (domain star_craft4)
-	(:requirements :strips :typing)
+(define (domain star_craft6)
+	(:requirements :strips :typing :fluents)
 	(:types
 		entidad localizacion recurso tipo tipoRecurso - object
 		unidad edificio - entidad
@@ -44,6 +44,10 @@
 		;indico que ha sido reclutado
 		(reclutado ?uni - unidad ?edi - edificio)
 
+	)
+	(:functions
+		;indico la cantidad almacenada de cada tipo de recurso
+		(cantidad ?tip_rec - tipoRecurso ?x)
 	)
 
 	;que una unidad se mueva de una localización a otra
@@ -242,5 +246,44 @@
 	)
 
 		
-	
+	;
+	(:action recolectar
+		:parameters (?rec - recurso ?loc - localizacion)
+		:precondition
+			(and
+				;comprobamos que se esta extrayendo dicho recurso
+				(exists (?tip_rec - tipoRecurso)
+					(and
+						(recursos ?rec ?tip_rec)
+						(extrayendo ?tip_rec)
+						(depositoEn ?loc ?tip_rec)
+
+						(at start (at ?x 0))
+						(at start
+							(< 50 (cantidad ?tip_rec ?x))
+						)
+					)
+				)
+
+				;comprobamos que dicho recurso esta en la localización indicada
+				(hay ?rec ?loc)
+
+			)
+		:effect
+
+		(and
+			
+			(when
+				(and (recursos ?rec gas))
+				(and
+					(increase (cantidad gas ?x) 10)
+				)
+			)
+			(when (and (recursos ?rec mineral))
+				(and
+					(increase (cantidad mineral ?x) 10)
+				)
+			)
+		)
+	)
 )

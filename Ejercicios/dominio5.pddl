@@ -1,13 +1,13 @@
-(define (domain star_craft4)
+(define (domain star_craft5)
 	(:requirements :strips :typing)
 	(:types
 		entidad localizacion recurso tipo tipoRecurso - object
 		unidad edificio - entidad
-		tipoEdificio tipoUnidad - tipo
+		tipoEdificio tipoUnidad investigacion - tipo
 	)
 	(:constants
 		vce marine segador - tipoUnidad
-		centro_de_mando barracon extractor - tipoEdificio
+		centro_de_mando barracon extractor bahia_de_ingenieria - tipoEdificio
 		mineral gas - tipoRecurso
 	)
 	(:predicates
@@ -43,6 +43,12 @@
 
 		;indico que ha sido reclutado
 		(reclutado ?uni - unidad ?edi - edificio)
+
+		;para indicar que investigaciones hay creadas
+		(creada ?inv - investigacion)
+
+		;indico que no tiene localización
+		(no_loc ?entidad)
 
 	)
 
@@ -139,35 +145,56 @@
 
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
-				(en ?edi ?loc)
+				(or
+					(en ?edi ?loc)
+					(no_loc ?edi)
+				)
+				
 
-				;que no se haya construido un edificio
+				;que no se haya construido un edificio en esa localización
+				(not (exists (?edi - edificio)
+					(and
+						(construido ?edi)
+						(en ?edi ?loc)
+					)
+				))
+
+				;que el edificio a construir no este construido
 				(not (construido ?edi))
 
+				;ademas
+				(or
+					;si el edificio a construir es un extractor, tiene que construirse
+					;en la misma localización donde este el recurso gas
+					(and
+						(edificios ?edi extractor)
+						(exists (?rec - recurso)
+							(and
+								(recursos ?rec gas)
+								(hay ?rec ?loc)
+							)
+						)
+					)
+					(not (edificios ?edi extractor))
+				)
+
 				;comprueba que recursos necesita para construir el edificio
+
 				(exists (?tip_edi - tipoEdificio)
 					(and
 						(edificios ?edi ?tip_edi)
-						(or
-							(and 
-								(necesita ?tip_edi mineral)
-								(not (necesita ?tip_edi gas))
-								(extrayendo mineral)
-							)
-							(and 
-								(necesita ?tip_edi gas)
-								(not (necesita ?tip_edi mineral))
-								(extrayendo gas)
-							)
-							(and 
-								(necesita ?tip_edi mineral)
-								(necesita ?tip_edi gas)
-								(extrayendo mineral)
-								(extrayendo gas)
+						(forall (?rec - tipoRecurso)
+							(or
+								(not (necesita ?tip_edi ?rec))
+								(and
+									(necesita ?tip_edi ?rec)
+									(extrayendo ?rec)
+								)
 							)
 						)
 					)
 				)
+				
 			)
 		:effect
 			(and ;aplicara los siguientes cambios
@@ -196,7 +223,10 @@
 					(and
 						(or
 							(unidades ?uni marine)
-							(unidades ?uni segador)
+							(and
+								(unidades ?uni segador)
+								(creada impulsar_segador)
+							)
 						)
 						(edificios ?edi barracon)
 						(en ?edi ?loc)
@@ -241,6 +271,36 @@
 			)
 	)
 
-		
 	
+	;crea ĺas investigaciones
+	(:action investigar
+		:parameters (?edi - edificio ?inv - investigacion)
+		:precondition
+			(and
+				;necestia que este construido el edificio
+				(construido ?edi)
+
+				;que el edificio sea de tipo bahia_de_ingenieria
+				(edificios ?edi bahia_de_ingenieria)
+
+				;comprueba que recursos necesita para crear dicha investigación
+				(forall (?rec - tipoRecurso)
+					(or
+						(not (necesita ?inv ?rec))
+						(and
+							(necesita ?inv ?rec)
+							(extrayendo ?rec)
+						)
+					)
+				)
+
+				;compruebo que no ha sido creada dicha investigación antes
+				(not (creada ?inv))
+			)
+		:effect
+			(and
+				;indico que se ha creado la investigación
+				(creada ?inv)
+			)
+	)
 )
