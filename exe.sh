@@ -37,9 +37,14 @@ case $1 in
 		dom=Ejercicios/dominio6.pddl
 		prob=Ejercicios/problema6.pddl
 		;;
+	7)
+		echo "Ejercicio 7"
+		dom=Ejercicios/dominio7.pddl
+		prob=Ejercicios/problema7.pddl
+		;;
 	prueba)
 		echo "Pruebas"
-		dom=Ejercicios/dominio6.pddl
+		dom=Ejercicios/dominio7.pddl
 		prob=Ejercicios/pruebas.pddl
 		;;
 	*)

@@ -1,5 +1,5 @@
-(define (problem star_craft_prob7)
-	(:domain star_craft7)
+(define (problem star_craft_prob6)
+	(:domain star_craft6)
 	(:objects
 		loc11 loc12 loc13 loc14 loc21 loc22 loc23 loc24 loc31 loc32 loc33 loc34 - localizacion
 		cent_mand1 extractor1 barracon1 - edificio
@@ -22,9 +22,6 @@
 
 		(camino loc31 loc32)
 		(camino loc33 loc34)
-
-		;inicializamos el tiempo total a 0
-		(= (tiempo_total) 0)
 
 		;inicializo los almacenados
 		(= (almacenado gas) 0)
@@ -104,5 +101,4 @@
 			(libre segador1)
 		)
 	)
-	(:metric minimize (tiempo_total))
 )
