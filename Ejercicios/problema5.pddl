@@ -24,10 +24,6 @@
 		(camino loc31 loc32)
 		(camino loc33 loc34)
 
-		;indico que no tiene localización
-		;(no_loc bahia_de_ingenieria1)
-		;(no_loc extractor1)
-
 		;indicamos el tipo de edificio
 		(edificios extractor1 extractor)
 		(edificios barracon1 barracon)

@@ -1,8 +1,14 @@
 (define (domain star_craft2)
 	(:requirements :strips :typing)
 	(:types
+		;indico como objetos las entidades, la localización, el recurso,
+		;, el tipo de recurso y el subtipo
 		entidad localizacion recurso tipoRecurso - object
+
+		;en entidad meto la unidad y el edificio
 		unidad edificio - entidad
+
+		;y en el subtipo tipo meto los tipos de unidad y edificio
 		tipoEdificio tipoUnidad - tipo
 	)
 	(:constants
@@ -79,15 +85,18 @@
 				;que el recurso este en la localización dada
 				(hay ?rec ?loc_rec)
 
-				;que la unidad sea de tipo vce
+				;que la unidad sea de tipo vce, porque entiendo que es el unico tipo 
+				;de unidad que se encarga de extraer los recursos
 				(unidades ?uni vce)
 
 				;y que la unidad este en la misma localización que el recurso
 				(en ?uni ?loc_rec)
 
-				;dependiendo del tipo de recurso
+				;dependiendo del tipo de recurso necesitara o no construir un edificio
 				(or
 					(recursos ?rec mineral)
+
+					;si es de tipo gas necesita tener construido un extractor
 					(and
 						(recursos ?rec gas)
 						(exists
@@ -104,8 +113,12 @@
 		:effect
 
 			(and
+				;pasa a no estar libre
 				(not (libre ?uni))
 			
+
+				;si es el recurso gas indico que se esta extrayendo y que hay un 
+				;deposito de gas en la localización dada.
 				(when
 					(and (recursos ?rec gas))
 					(and
@@ -113,6 +126,9 @@
 						(extrayendo gas)
 					)
 				)
+
+				;si es el recurso mineral indico que se esta extrayendo y que hay un 
+				;deposito de mineral en la localización dada.
 				(when (and (recursos ?rec mineral))
 					(and
 						(depositoEn ?loc_rec mineral)
@@ -137,24 +153,47 @@
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
 
-				;que no se haya construido un edificio
+				;y puede que este definido o no el lugar donde se va a construir el edificio
+				(or
+					(en ?edi ?loc)
+					(not (en ?edi ?loc))
+				)
+
+
+				;que no se haya construido el edificio
 				(not (construido ?edi))
 
-				;que se este extrayendo un recurso
-				(or
-					(and 
-						(edificios ?edi extractor)
-						(necesita extractor mineral)
-						(extrayendo mineral)
+				;comprueba que recursos necesita para construir el edificio
+				(exists (?tip_edi - tipoEdificio)
+					(and
+						;indico el tipo de edificio que es
+						(edificios ?edi ?tip_edi)
+						
+						;comprueba que recursos necesita
+						(forall (?rec - tipoRecurso)
+							(or
+								(not (necesita ?tip_edi ?rec))
+								(and
+									(necesita ?tip_edi ?rec)
+									(extrayendo ?rec)
+								)
+							)
+						)
 					)
 				)
 
 				;ademas
 				(or
-					;que no haya un edificio extractor construido
+					;si el edificio a construir es un extractor, tiene que construirse
+					;en la misma localización donde este el recurso gas
 					(and
 						(edificios ?edi extractor)
-						(not (construido ?edi))
+						(exists (?rec - recurso)
+							(and
+								(recursos ?rec gas)
+								(hay ?rec ?loc)
+							)
+						)
 					)
 					;o que este construido el edificio extractor y tenga un deposito de gas
 					(and

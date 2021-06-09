@@ -5,9 +5,11 @@
 	(:types
 		;indico como objetos las entidades, la localización el recurso,
 		;un subgrupo de tipo y el tipo de recurso
-		entidad localizacion recurso tipo tipoRecurso - objectç
+		entidad localizacion recurso tipo tipoRecurso - object
+
 		;en entidad meto la unidad y el edificio
 		unidad edificio - entidad
+		
 		;y en el subtipo tipo meto los tipos de unidad y edificio
 		tipoEdificio tipoUnidad - tipo
 	)
@@ -266,6 +268,8 @@
 				;en la localización indicada
 				(en ?edi ?loc)
 
+				;y dependiendo del tipo de edificio se le restara ciertos recursos
+				;y se le incrementa el tiempo empleado
 				(when (edificios ?edi extractor)
 					(and
 						(decrease (almacenado mineral) (necesita extractor mineral))
@@ -311,7 +315,9 @@
 
 				;compruebo que no se ha creado antes esa unidad
 				(not (exists (?loc2 - localizacion)
-						(en ?uni ?loc2)
+						(and
+							(en ?uni ?loc2)
+						)
 					)
 				)
 
@@ -335,7 +341,7 @@
 		:effect
 			(and ;aplicara los siguientes cambios
 
-				;consumimos los recursos necesarios
+				;consumimos los recursos necesarios e incrementa el tiempo empleado
 				(when (unidades ?uni vce)
 					(and
 						(decrease (almacenado mineral) (necesita vce mineral))
@@ -377,14 +383,15 @@
 				;compruebo que la localización coincide con el recurso
 				(hay ?rec ?loc)
 
-				;comprobamos que se esta extrayendo dicho recurso
-				;y que el incremento no supere el tope del almacenado
+				;comprobamos que se esta extrayendo dicho recurso, que tiene un 
+				;deposito y que el incremento no supere el tope del almacenado
 				(exists (?tip_rec - tipoRecurso)
 					(and
 						(recursos ?rec ?tip_rec)
 						(extrayendo ?tip_rec)
 						(depositoEn ?loc ?tip_rec)
 
+				;el calculo seria almacen += numero_unidades_extrayendo_en_loc * 10
 						(<= 
 							(+ 
 								(almacenado ?tip_rec)
@@ -396,25 +403,24 @@
 					)
 				)
 
-				;comprobamos que dicho recurso esta en la localización indicada
-				(hay ?rec ?loc)
-
 			)
 		:effect
 
 		(and
-			
+			;incrementamos el numero de recursos del almacen
 			(when
 				(and (recursos ?rec gas))
 				(and
-					(increase (almacenado gas) 10)
+					(increase (almacenado gas) (* 10 (nAsignados ?loc)))
 				)
 			)
 			(when (and (recursos ?rec mineral))
 				(and
-					(increase (almacenado mineral) 10)
+					(increase (almacenado mineral) (* 10 (nAsignados ?loc)))
 				)
 			)
+
+			;e incrementamos el tiempo empleado en almacenar dicho recurso
 			(increase (tiempo_total) 10)
 		)
 	)

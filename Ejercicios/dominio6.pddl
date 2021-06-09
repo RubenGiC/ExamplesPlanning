@@ -1,8 +1,14 @@
 (define (domain star_craft6)
 	(:requirements :strips :typing :fluents)
 	(:types
+		;indico como objetos las entidades, la localización el recurso,
+		;un subgrupo de tipo y el tipo de recurso
 		entidad localizacion recurso tipo tipoRecurso - object
+
+		;en entidad meto la unidad y el edificio
 		unidad edificio - entidad
+
+		;y en el subtipo tipo meto los tipos de unidad y edificio
 		tipoEdificio tipoUnidad - tipo
 	)
 	(:constants
@@ -30,9 +36,6 @@
 		;indico que la unidad esta libre
 		(libre ?uni - unidad)
 
-		;indico lo que necesita el edificio para construirse y tambien con las unidades
-		;(necesita ?x - tipo ?rec - tipoRecurso)
-
 		;indico los tipos de edificios, unidades y recursos
 		(unidades ?uni - unidad ?tip - tipoUnidad)
 		(edificios ?edif - edificio ?tip - tipoEdificio)
@@ -48,7 +51,13 @@
 	(:functions
 		;indico la cantidad almacenada de cada tipo de recurso
 		(almacenado ?tip_rec - tipoRecurso)
+
+		;indico el numero de unidades asignadas para extraer un recurso de una 
+		;localización concreta
 		(nAsignados ?loc - localizacion)
+
+		;indico lo que necesita el edificio para construirse y tambien con las 
+		;unidades, el tipo de recurso y su cantidad
 		(necesita ?tip - tipo ?rec - tipoRecurso)
 	)
 
@@ -72,6 +81,7 @@
 			(and
 				;la unidad ya no esta en la localización de origen
 				(not (en ?uni ?loc_ori))
+
 				;y esta en la localización destino
 				(en ?uni ?loc_des)
 			)
@@ -88,15 +98,18 @@
 				;que el recurso este en la localización dada
 				(hay ?rec ?loc_rec)
 
-				;que la unidad sea de tipo vce
+				;que la unidad sea de tipo vce, porque entiendo que es el unico tipo 
+				;de unidad que se encarga de extraer los recursos
 				(unidades ?uni vce)
 
 				;y que la unidad este en la misma localización que el recurso
 				(en ?uni ?loc_rec)
 
-				;dependiendo del tipo de recurso
+				;dependiendo del tipo de recurso necesitara o no construir un edificio
 				(or
 					(recursos ?rec mineral)
+
+					;si es de tipo gas necesita tener construido un extractor
 					(and
 						(recursos ?rec gas)
 						(exists
@@ -113,8 +126,11 @@
 		:effect
 
 			(and
+				;pasa a no estar libre
 				(not (libre ?uni))			
 
+				;si es el recurso gas indico que se esta extrayendo y que hay un 
+				;deposito de gas en la localización dada.
 				(when
 					(and (recursos ?rec gas))
 					(and
@@ -122,6 +138,9 @@
 						(extrayendo gas)
 					)
 				)
+
+				;si es el recurso mineral indico que se esta extrayendo y que hay un 
+				;deposito de mineral en la localización dada.
 				(when (and (recursos ?rec mineral))
 					(and
 						(depositoEn ?loc_rec mineral)
@@ -129,6 +148,7 @@
 					)
 				)
 
+				;incrementa el numero unidades asignadas a ese recurso en esa localización
 				(increase (nAsignados ?loc_rec) 1)
 			)
 	)
@@ -156,6 +176,7 @@
 
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
+				;y puede que este definido o no el lugar donde se va a construir el edificio
 				(or
 					(en ?edi ?loc)
 					(not (en ?edi ?loc))
@@ -168,18 +189,26 @@
 				;y que la cantidad a necesitar la tenga el almacen
 				(exists (?tip_edi - tipoEdificio)
 					(and
+						;indico el tipo de edificio que es
 						(edificios ?edi ?tip_edi)
+
+						;comprueba que recursos necesita
 						(or
+
+							;y si necesita solo mineral, que tenga la cantidad que 
+							;necesita en el almacen y que se este extrayendo dicho mineral
 							(and 
 								(>= (almacenado mineral) (necesita ?tip_edi mineral))
 								(<= (necesita ?tip_edi gas) 0)
 								(extrayendo mineral)
 							)
+							;lo mismo pero con gas
 							(and 
 								(>= (almacenado gas) (necesita ?tip_edi gas))
 								(<= (necesita ?tip_edi mineral) 0)
 								(extrayendo gas)
 							)
+							;y lo mismo pero con ambos recursos
 							(and 
 								(>= (almacenado mineral) (necesita ?tip_edi mineral))
 								(>= (almacenado gas) (necesita ?tip_edi gas))
@@ -203,6 +232,7 @@
 							)
 						)
 					)
+					;o que no sea un extractor lo que se va a construir
 					(not (edificios ?edi extractor))
 				)
 			)
@@ -215,6 +245,7 @@
 				;en la localización indicada
 				(en ?edi ?loc)
 
+				;y dependiendo del tipo de edificio se le restara ciertos recursos
 				(when (edificios ?edi extractor)
 					(and
 						(decrease (almacenado mineral) (necesita extractor mineral))
@@ -258,7 +289,9 @@
 
 				;compruebo que no se ha creado antes esa unidad
 				(not (exists (?loc2 - localizacion)
-						(en ?uni ?loc2)
+						(and
+							(en ?uni ?loc2)
+						)
 					)
 				)
 
@@ -329,6 +362,7 @@
 						(extrayendo ?tip_rec)
 						(depositoEn ?loc ?tip_rec)
 
+				;el calculo seria almacen += numero_unidades_extrayendo_en_loc * 10
 						(<= 
 							(+ 
 								(almacenado ?tip_rec)
@@ -347,16 +381,16 @@
 		:effect
 
 		(and
-			
+			;incrementamos el numero de recursos del almacen
 			(when
 				(and (recursos ?rec gas))
 				(and
-					(increase (almacenado gas) 10)
+					(increase (almacenado gas) (* 10 (nAsignados ?loc)))
 				)
 			)
 			(when (and (recursos ?rec mineral))
 				(and
-					(increase (almacenado mineral) 10)
+					(increase (almacenado mineral) (* 10 (nAsignados ?loc)))
 				)
 			)
 		)

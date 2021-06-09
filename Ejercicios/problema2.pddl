@@ -31,6 +31,7 @@
 
 		;el centro de comando 1 se encuentra en la localización 11
 		(construido cent_mand1)
+		(en cent_mand1 loc11)
 
 		;El tipo de edificio es CentroDeMando
 		(edificios cent_mand1 centro_de_mando)

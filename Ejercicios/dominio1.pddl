@@ -1,7 +1,11 @@
 (define (domain star_craft1)
 	(:requirements :strips :typing)
 	(:types
+		;indico como objetos las entidades, la localización, el recurso,
+		;, el tipo de edificio, unidad y recurso
 		entidad localizacion recurso tipoEdificio tipoUnidad tipoRecurso - object
+
+		;en entidad meto la unidad y el edificio
 		unidad edificio - entidad
 	)
 	(:constants
@@ -17,7 +21,7 @@
 		;indico que hay un camino entre 2 localizaciones
 		(camino ?loc1 ?loc2 - localizacion)
 
-		;indico si que hay un edificio construido en la localizacion indicada
+		;indico si que hay un edificio construido
 		(construido ?edi - edificio)
 
 		;indico que hay recursos en cierta localizacion
@@ -50,6 +54,9 @@
 					(camino ?loc_ori ?loc_des)
 					(camino ?loc_des ?loc_ori)
 				)
+
+				;que esa unidad este libre
+				(libre ?uni)
 			)
 		:effect
 			(and
@@ -61,7 +68,6 @@
 	)
 
 	;Asigna a una unidad la extracción de un recurso
-	;Asigna a una unidad la extracción de un recurso
 	(:action asignar
 		:parameters (?uni - unidad ?loc_rec - localizacion ?rec - recurso)
 		:precondition
@@ -72,7 +78,8 @@
 				;que el recurso este en la localización dada
 				(hay ?rec ?loc_rec)
 
-				;que la unidad sea de tipo vce
+				;que la unidad sea de tipo vce, porque entiendo que es el unico tipo 
+				;de unidad que se encarga de extraer los recursos
 				(unidades ?uni vce)
 
 				;y que la unidad este en la misma localización que el recurso

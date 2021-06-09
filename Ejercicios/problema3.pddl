@@ -71,6 +71,7 @@
 	)
 	(:goal
 		(and
+			;objetivo construir el barracon1 en la localización 32
 			(construido barracon1)
 			(en barracon1 loc32)
 		)

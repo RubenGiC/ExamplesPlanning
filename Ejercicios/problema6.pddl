@@ -67,7 +67,7 @@
 		;El tipo de edificio es CentroDeMando
 		(edificios cent_mand1 centro_de_mando)
 
-		;indicamos donde se encuentra los edificios
+		;indicamos donde se encuentra el edificio
 		(en cent_mand1 loc11)
 
 		;y las unidades tambien se encuentra en esa misma localizacion

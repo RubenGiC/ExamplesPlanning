@@ -1,8 +1,14 @@
 (define (domain star_craft5)
 	(:requirements :strips :typing)
 	(:types
+		;indico como objetos las entidades, la localización el recurso,
+		;un subgrupo de tipo y el tipo de recurso
 		entidad localizacion recurso tipo tipoRecurso - object
+
+		;en entidad meto la unidad y el edificio
 		unidad edificio - entidad
+
+		;y en el subtipo tipo meto los tipos de unidad y edificio
 		tipoEdificio tipoUnidad investigacion - tipo
 	)
 	(:constants
@@ -47,9 +53,6 @@
 		;para indicar que investigaciones hay creadas
 		(creada ?inv - investigacion)
 
-		;indico que no tiene localización
-		(no_loc ?entidad)
-
 	)
 
 	;que una unidad se mueva de una localización a otra
@@ -72,6 +75,7 @@
 			(and
 				;la unidad ya no esta en la localización de origen
 				(not (en ?uni ?loc_ori))
+
 				;y esta en la localización destino
 				(en ?uni ?loc_des)
 			)
@@ -88,15 +92,18 @@
 				;que el recurso este en la localización dada
 				(hay ?rec ?loc_rec)
 
-				;que la unidad sea de tipo vce
+				;que la unidad sea de tipo vce, porque entiendo que es el unico tipo 
+				;de unidad que se encarga de extraer los recursos
 				(unidades ?uni vce)
 
 				;y que la unidad este en la misma localización que el recurso
 				(en ?uni ?loc_rec)
 
-				;dependiendo del tipo de recurso
+				;dependiendo del tipo de recurso necesitara o no construir un edificio
 				(or
 					(recursos ?rec mineral)
+
+					;si es de tipo gas necesita tener construido un extractor
 					(and
 						(recursos ?rec gas)
 						(exists
@@ -113,8 +120,11 @@
 		:effect
 
 			(and
+				;pasa a no estar libre
 				(not (libre ?uni))			
 
+				;si es el recurso gas indico que se esta extrayendo y que hay un 
+				;deposito de gas en la localización dada.
 				(when
 					(and (recursos ?rec gas))
 					(and
@@ -122,6 +132,9 @@
 						(extrayendo gas)
 					)
 				)
+
+				;si es el recurso mineral indico que se esta extrayendo y que hay un 
+				;deposito de mineral en la localización dada.
 				(when (and (recursos ?rec mineral))
 					(and
 						(depositoEn ?loc_rec mineral)
@@ -154,11 +167,8 @@
 
 				;que la unidad este en la localización donde se construira el edificio
 				(en ?uni ?loc)
-				;(or
-				;	(en ?edi ?loc)
-				;	(no_loc ?edi)
-				;)
 
+				;y puede que este definido o no el lugar donde se va a construir el edificio
 				(or
 					(en ?edi ?loc)
 					(not (en ?edi ?loc))
@@ -180,14 +190,18 @@
 							)
 						)
 					)
+					;o que no sea un extractor lo que se va a construir
 					(not (edificios ?edi extractor))
 				)
 
 				;comprueba que recursos necesita para construir el edificio
-
+				;y que la cantidad a necesitar la tenga el almacen
 				(exists (?tip_edi - tipoEdificio)
 					(and
+						;indico el tipo de edificio que es
 						(edificios ?edi ?tip_edi)
+
+						;comprueba que recursos necesita
 						(forall (?rec - tipoRecurso)
 							(or
 								(not (necesita ?tip_edi ?rec))
@@ -243,7 +257,9 @@
 
 				;compruebo que no se ha creado antes esa unidad
 				(not (exists (?loc2 - localizacion)
-						(en ?uni ?loc2)
+						(and
+							(en ?uni ?loc2)
+						)
 					)
 				)
 
